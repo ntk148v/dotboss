@@ -1,0 +1,12 @@
+# Use https://github.com/github/gitignore for more gitignores
+
+.cache
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
