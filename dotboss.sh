@@ -46,8 +46,15 @@ logo() {
 
 # check if git exists
 if ! command -v git &>/dev/null; then
-	printf "%s\n\n" "${BOLD}${FG_SKYBLUE}${DOTMAN_LOGO}${RESET}"
-	echo "Can't work without Git 😞"
+	printf "%s\n\n" "${BOLD}${FG_SKYBLUE}${RESET}"
+	echo "I can't leave without Git 😞"
+	exit 1
+fi
+
+# check if stow exists
+if ! command -v stow &>/dev/null; then
+	printf "%s\n\n" "${BOLD}${FG_SKYBLUE}${RESET}"
+	echo "I can't leave without Stow 😞"
 	exit 1
 fi
 
@@ -61,15 +68,41 @@ trap 'catch_ctrl+c' SIGINT
 
 goodbye() {
 	printf "\a\n\n%s\n" "${BOLD}Thanks for using dotboss 🖖.${RESET}"
-	printf "\n%s%s" "${BOLD}Follow ${BG_AQUA}${FG_BLACK}@bhupeshimself${RESET}" "${BOLD} on Twitter "
-	printf "%s\n" "for more updates.${RESET}"
 	printf "%s\n" "${BOLD}Report Bugs 🐛 @ ${UL}https://github.com/ntk148v/dotboss/issues${RUL}${RESET}"
 }
 
 intro() {
 	BOSS_NAME=$LOGNAME
-	printf "\n\a%s" "Hi ${BOLD}${FG_ORANGE}$BOSS_NAME${RESET} 👋"
+	printf "\n\a%s" "Hi ${BOLD}${FG_ORANGE}${BOSS_NAME}${RESET} 👋"
 	logo
 }
 
+init_check() {
+	# Check whether its a first time use or not
+	if [[ -z ${DOT_REPO} && -z ${DOT_DEST} ]]; then
+		initial_setup
+		goodbye
+	else
+		echo "Do something"
+	fi
+}
+
+initial_setup() {
+	printf "\n\n%s\n" "First time use 🔥, spend time to do a ${BOLD}dotboss setup${RESET}"
+	printf "%s\n" "...................................."
+	read -p "➤ Enter dotfiles repository URL : " -r DOT_REPO
+	read -p "➤ Where should I clone ${BOLD}$(basename "${DOT_REPO}")${RESET} (${HOME}/..): " -r DOT_DEST
+	DOT_DEST=${DOT_DEST:-$HOME}
+
+	if [[ -d "$HOME/$DOT_DEST" ]]; then
+		printf "\n%s\r\n" "${BOLD}Calling 📞 Git ... ${RESET}"
+		clone_dotrepo "$DOT_DEST" "$DOT_REPO"
+		printf "\n%s\n" "Open a new terminal or source your shell config"
+	else
+		printf "\n%s" "[❌]${BOLD}$DOT_DEST${RESET} Not a Valid directory"
+		exit 1
+	fi
+}
+
 intro
+init_check
