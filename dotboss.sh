@@ -44,17 +44,25 @@ logo() {
 	printf "${RESET}\n%s" ""
 }
 
+# TODO(kiennt): Create a loop
 # check if git exists
 if ! command -v git &>/dev/null; then
 	printf "%s\n\n" "${BOLD}${FG_SKYBLUE}${RESET}"
-	echo "I can't leave without Git 😞"
+	echo "I can't live without Git 😞"
 	exit 1
 fi
 
 # check if stow exists
 if ! command -v stow &>/dev/null; then
 	printf "%s\n\n" "${BOLD}${FG_SKYBLUE}${RESET}"
-	echo "I can't leave without Stow 😞"
+	echo "I can't live without Stow 😞"
+	exit 1
+fi
+
+# check if tree exists
+if ! command -v tree &>/dev/null; then
+	printf "%s\n\n" "${BOLD}${FG_SKYBLUE}${RESET}"
+	echo "I can't live without Tree 😞"
 	exit 1
 fi
 
@@ -84,6 +92,7 @@ init_check() {
 		goodbye
 	else
 		repo_check
+		manage
 	fi
 }
 
@@ -148,23 +157,108 @@ add_env() {
 	printf "\n%s" "Configuration for SHELL: ${BOLD}$current_shell${RESET} has been updated."
 }
 
-repo_check(){
+repo_check() {
 	# check if dotfile repo is present inside DOT_DEST
 
 	DOT_REPO_NAME=$(basename "${DOT_REPO}")
 	# all paths are relative to HOME
 	if [[ -d ${HOME}/${DOT_DEST}/${DOT_REPO_NAME} ]]; then
-	    printf "\n%s\n" "Found ${BOLD}${DOT_REPO_NAME}${RESET} as dotfile repo in ${BOLD}~/${DOT_DEST}/${RESET}"
+		printf "\n%s\n" "Found ${BOLD}${DOT_REPO_NAME}${RESET} as dotfile repo in ${BOLD}~/${DOT_DEST}/${RESET}"
 	else
-	    printf "\n\n%s\n" "[❌] ${BOLD}${DOT_REPO_NAME}${RESET} not present inside path ${BOLD}${HOME}/${DOT_DEST}${RESET}"
+		printf "\n\n%s\n" "[❌] ${BOLD}${DOT_REPO_NAME}${RESET} not present inside path ${BOLD}${HOME}/${DOT_DEST}${RESET}"
 		read -p "Should I clone it ? [Y/n]: " -n 1 -r USER_INPUT
 		USER_INPUT=${USER_INPUT:-y}
 		case $USER_INPUT in
-			[y/Y]* ) clone_dotrepo "$DOT_DEST" "$DOT_REPO" ;;
-			[n/N]* ) printf "\n%s" "${BOLD}${DOT_REPO_NAME}${RESET} not found";;
-			* )     printf "\n%s\n" "[❌] Invalid Input 🙄, Try Again";;
+		[y/Y]*) clone_dotrepo "$DOT_DEST" "$DOT_REPO" ;;
+		[n/N]*) printf "\n%s" "${BOLD}${DOT_REPO_NAME}${RESET} not found" ;;
+		*) printf "\n%s\n" "[❌] Invalid Input 🙄, Try Again" ;;
 		esac
 	fi
+}
+
+setup_stow() {
+	[[ "$DOT_DEST" && "$DOT_REPO" && "$DOT_REPO_REMOTE" && "$DOT_REPO_BRANCH" ]] && return
+	DOT_REPO_NAME=$(basename "${DOT_REPO}")
+	printf "\n%s\n" "Your current dotfiles in ${BOLD}${DOT_DEST}${RESET}"
+	tree ${DOT_DEST}/${DOT_REPO_NAME}
+	printf "\n%s\n" "Execute stow command..."
+	# force create symbol link
+	# When stowing, if a target is encountered which already exists but is a plain file (and hence not owned by any existing stow package), then normally Stow will register this as a
+	# conflict and refuse to proceed.  This option changes that behaviour so that the file is moved to the same relative place within the package's installation image within the stow
+	# directory, and then stowing proceeds as before.  So effectively, the file becomes adopted by the stow package, without its contents changing.
+	stow -v --adopt -t "${HOME}" ${DOT_REPO_NAME}
+	printf "\n"
+}
+
+setup_automatic() {
+	printf "\n%s\n" "${BOLD}Setup automatic...${RESET}"
+}
+
+setup_manual() {
+	printf "\n%s\n" "${BOLD}Setup manual...${RESET}"
+	while :; do
+		printf "\n%s" "[${BOLD}1${RESET}] Show diff"
+		printf "\n%s" "[${BOLD}2${RESET}] Push changed dotfiles"
+		printf "\n%s" "[${BOLD}3${RESET}] Pull latest changes"
+		printf "\n%s\n" "[${BOLD}q/Q${RESET}] Quit Session"
+		read -p "What do you want me to do ? [${BOLD}1${RESET}]: " -n 1 -r USER_INPUT
+		# Default choice is [1], See Parameter Expansion
+		USER_INPUT=${USER_INPUT:-1}
+		case $USER_INPUT in
+		[1]*) show_diff_check ;;
+		[2]*) dot_push ;;
+		[3]*) dot_pull ;;
+		[q/Q]*)
+			goodbye
+			exit
+			;;
+		*) printf "\n%s\n" "[❌]Invalid Input 🙄, Try Again" ;;
+		esac
+	done
+}
+
+dot_pull() {
+	# pull changes (if any) from the remote repo
+	printf "\n%s\n" "${BOLD}Pulling dotfiles ...${RESET}"
+	dot_repo="${HOME}/${DOT_DEST}/$(basename "${DOT_REPO}")"
+	printf "\n%s\n" "Pulling changes in $dot_repo"
+	GET_BRANCH=$(git remote show origin | awk '/HEAD/ {print $3}')
+	printf "\n%s\n" "Pulling from ${BOLD}${GET_BRANCH}"
+	git -C "$dot_repo" pull origin "${GET_BRANCH}"
+}
+
+dot_push() {
+
+}
+
+show_diff_check() {
+	printf "\n%s\n" "${BOLD}Check git status & git diff ...${RESET}"
+	dot_repo="${HOME}/${DOT_DEST}/$(basename "${DOT_REPO}")"
+	git -C "$dot_repo" status
+	git -C "$dot_repo" diff
+}
+
+manage() {
+	# Setup stow
+	setup_stow
+
+	while :; do
+		printf "\n%s\n" "[${BOLD}1${RESET}] Automatic mode with gitwatch"
+		printf "\n%s\n" "[${BOLD}2${RESET}] Manual mode"
+		printf "\n%s\n" "[${BOLD}q/Q${RESET}] Quit Session"
+		read -p "What do you want me to do? [${BOLD}1${RESET}]: " -n 1 -r USER_INPUT
+		# Default choice is [1], See Parameter Expansion
+		USER_INPUT=${USER_INPUT:-1}
+		case $USER_INPUT in
+		[1]*) setup_automatic ;;
+		[2]*) setup_manual ;;
+		[q/Q]*)
+			goodbye
+			exit
+			;;
+		*) printf "\n%s\n" "[❌] Invalid Input 🙄, Try Again" ;;
+		esac
+	done
 }
 
 intro
