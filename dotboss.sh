@@ -87,7 +87,7 @@ intro() {
 
 init_check() {
 	# Check whether its a first time use or not
-	if [[ -z ${DOT_REPO} && -z ${DOT_PARENT_DIR} ]]; then
+	if [[ -z ${DOT_REPO} && -z ${DOT_PARENT_DIR} && -z ${DOT_REPO_REMOTE} && -z ${DOT_REPO_BRANCH} && -z ${DOT_REPO_DIR} ]]; then
 		initial_setup
 		goodbye
 	else
@@ -129,7 +129,7 @@ clone_dotrepo() {
 	DOT_REPO_BRANCH=$4
 
 	if git -C "${DOT_PARENT_DIR}" clone "${DOT_REPO}"; then
-		if [[ $DOT_REPO && $DOT_PARENT_DIR ]]; then
+		if [[ "$DOT_PARENT_DIR" && "$DOT_REPO" && "$DOT_REPO_REMOTE" && "$DOT_REPO_BRANCH" ]]; then
 			add_env "$DOT_REPO" "$DOT_PARENT_DIR" "$DOT_REPO_REMOTE" "$DOT_REPO_BRANCH"
 		fi
 		printf "\n%s" "[✔️] dotboss successfully configured"
@@ -183,7 +183,6 @@ repo_check() {
 }
 
 setup_stow() {
-	[[ "$DOT_PARENT_DIR" && "$DOT_REPO" && "$DOT_REPO_REMOTE" && "$DOT_REPO_BRANCH" && "$DOT_REPO_DIR" ]] && return
 	printf "\n%s\n" "Your current dotfiles in ${BOLD}${DOT_REPO_DIR}${RESET}"
 	tree ${DOT_REPO_DIR}/home
 	printf "\n%s\n" "Execute stow command..."
