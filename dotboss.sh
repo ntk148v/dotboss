@@ -141,7 +141,10 @@ clone_dotrepo() {
 }
 
 add_env() {
-	[[ "$DOT_PARENT_DIR" && "$DOT_REPO" && "$DOT_REPO_REMOTE" && "$DOT_REPO_BRANCH" ]] && return
+	echo "$DOT_PARENT_DIR $DOT_REPO $DOT_REPO_REMOTE $DOT_REPO_BRANCH"
+	if [[ $(grep -Fxq "export DOT_REPO" "$HOME"/.bashrc) || $(grep -Fxq "export DOT_REPO" "$HOME"/.zshrc) ]]; then
+		return
+	fi
 	# export environment variables
 	printf "\n%s\n" "Exporting env variables DOT_PARENT_DIR, DOT_REPO, DOT_REPO_REMOTE & DOT_REPO_BRANCH ..."
 
