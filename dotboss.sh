@@ -146,15 +146,17 @@ add_env() {
 	printf "\n%s\n" "Exporting env variables DOT_PARENT_DIR, DOT_REPO, DOT_REPO_REMOTE & DOT_REPO_BRANCH ..."
 
 	current_shell=$(basename "$SHELL")
+	DOT_REPO_NAME=$(basename "${DOT_REPO}")
+	DOT_REPO_DIR=${DOT_PARENT_DIR}/${DOT_REPO_NAME}
 	if [[ $current_shell == "zsh" ]]; then
 		echo "# Dotboss configs" >>"$HOME"/.zshrc
-		echo "export DOT_REPO=$1 DOT_PARENT_DIR=$2 DOT_REPO_REMOTE=$3 DOT_REPO_BRANCH=$4" >>"$HOME"/.zshrc
+		echo "export DOT_REPO=$1 DOT_PARENT_DIR=$2 DOT_REPO_REMOTE=$3 DOT_REPO_BRANCH=$4 DOT_REPO_DIR=${DOT_REPO_DIR}" >>"$HOME"/.zshrc
 	elif [[ $current_shell == "bash" ]]; then
 		# assume we have a fallback to bash
 		echo "# Dotboss configs" >>"$HOME"/.bashrc
-		echo "export DOT_REPO=$1 DOT_PARENT_DIR=$2 DOT_REPO_REMOTE=$3 DOT_REPO_BRANCH=$4" >>"$HOME"/.bashrc
+		echo "export DOT_REPO=$1 DOT_PARENT_DIR=$2 DOT_REPO_REMOTE=$3 DOT_REPO_BRANCH=$4 DOT_REPO_DIR=${DOT_REPO_DIR}" >>"$HOME"/.bashrc
 	else
-		echo "Couldn't export ${BOLD}DOT_REPO=$1${RESET} and ${BOLD}DOT_PARENT_DIR=$2${RESET}"
+		echo "Couldn't export ${BOLD}DOT_REPO=$1${RESET} and ${BOLD}DOT_PARENT_DIR=$2 DOT_REPO_REMOTE=$3 DOT_REPO_BRANCH=$4 DOT_REPO_DIR=${DOT_REPO_DIR}${RESET}"
 		echo "Consider exporting them manually."
 		exit 1
 	fi
@@ -181,15 +183,13 @@ repo_check() {
 }
 
 setup_stow() {
-	[[ "$DOT_PARENT_DIR" && "$DOT_REPO" && "$DOT_REPO_REMOTE" && "$DOT_REPO_BRANCH" ]] && return
-	DOT_REPO_NAME=$(basename "${DOT_REPO}")❌
-	printf "\n%s\n" "Your current dotfiles in ${BOLD}${DOT_PARENT_DIR}${RESET}"
-	tree ${DOT_PARENT_DIR}/${DOT_REPO_NAME}/o
+	[[ "$DOT_PARENT_DIR" && "$DOT_REPO" && "$DOT_REPO_REMOTE" && "$DOT_REPO_BRANCH" && "$DOT_REPO_DIR" ]] && return
+	printf "\n%s\n" "Your current dotfiles in ${BOLD}${DOT_REPO_DIR}${RESET}"
+	tree ${DOT_REPO_DIR}/home
 	printf "\n%s\n" "Execute stow command..."
 	# force create symbol link
 	# for more details, please check `man stow`
 	stow -v --adopt -t "${HOME}" ${DOT_REPO_NAME}
-	printf "\n"
 }
 
 setup_automatic() {
@@ -198,15 +198,35 @@ setup_automatic() {
 	gitwatch_proc=$(ps -ef | grep "gitwatch" | grep -v "grep")
 	if [[ ${#gitwatch_proc} != 0 ]]; then
 		printf "\n%s\n" "Found gitwatch processes is running"
-
+		printf "\n%s" "[${BOLD}1${RESET}] Kill the current gitwatch process(es)"
+		printf "\n%s" "[${BOLD}2${RESET}] Skip the setup, keep it as before"
+		printf "\n%s\n" "[${BOLD}q/Q${RESET}] Quit Session"
+		read -p "What do you want me to do ? [${BOLD}1${RESET}]: " -n 1 -r USER_INPUT
+		# Default choice is [1], See Parameter Expansion
+		USER_INPUT=${USER_INPUT:-1}
+		case $USER_INPUT in
+		[1]*) kill_gitwatch ;;
+		[2]*)
+			printf "\n%s" "${BOLD}Ok, just keep it 😌${RESET}"
+			goodbye
+			return
+			;;
+		[q/Q]*)
+			goodbye
+			exit
+			;;
+		*) printf "\n%s\n" "[❌]Invalid Input 🙄, Try Again" ;;
+		esac
+	else
+		start_gitwatch
 	fi
 }
 
 start_gitwatch() {
 	printf "\n%s\n" "${BOLD}Start a gitwatch process in background${RESET}"
-	nohup gitwatch -r origin -b master ${DOT_PARENT_DIR}/$(basename "${DOT_REPO}") &
+	nohup gitwatch -r ${DOT_REPO_REMOTE} -b ${DOT_REPO_BRANCH} ${DOT_REPO_DIR}") &
 	printf "\n%s\n" "${BOLD}Create init file to start gitwatch at startup (require ${BOLD}root priviledge${RESET})"
-	sudo echo "nohup gitwatch -r origin -b master ${DOT_PARENT_DIR}/$(basename "${DOT_REPO}") &" > /etc/init.d/dotboss_gitwatch
+	sudo echo "nohup gitwatch -r origin -b master ${DOT_REPO_DIR}") &" >/etc/init.d/dotboss_gitwatch
 	sudo chmod a+x /etc/init.d/dotboss_gitwatch
 }
 
@@ -241,41 +261,39 @@ setup_manual() {
 
 show_diff_check() {
 	printf "\n%s\n" "${BOLD}Check git status & git diff...${RESET}"
-	dot_repo="${DOT_PARENT_DIR}/$(basename "${DOT_REPO}")"
-	printf "\n%s\n" "${BOLD}List all file changed${RESET}"
-	changed_files=$(git -C "$dot_repo" --no-pager diff --name-only)
-	printf "\n%s\n" "$changed_files"
-	changes=$(git -C "$dot_repo" --no-pager diff --color)
-	printf "\n%s\n" "${BOLD}List all changes${RESET}"
+	printf "\n%s" "${BOLD}List all file changed${RESET}"
+	changed_files=$(git -C "${DOT_REPO_DIR}" --no-pager diff --name-only)
+	printf "\n%s" "$changed_files"
+	changes=$(git -C "${DOT_REPO_DIR}" --no-pager diff --color)
+	printf "\n%s" "${BOLD}List all changes${RESET}"
 	printf "\n%s\n" "$changes"
 }
 
 dot_pull() {
 	# pull changes (if any) from the remote repo
 	printf "\n%s\n" "${BOLD}Pulling dotfiles ...${RESET}"
-	dot_repo="${DOT_PARENT_DIR}/$(basename "${DOT_REPO}")"
-	printf "\n%s\n" "Pulling changes in $dot_repo"
+	printf "\n%s\n" "Pulling changes in ${DOT_REPO_DIR}"
 	GET_BRANCH=$(git remote show origin | awk '/HEAD/ {print $3}')
 	printf "\n%s\n" "Pulling from ${BOLD}${GET_BRANCH}"
-	git -C "$dot_repo" pull origin "${GET_BRANCH}"
+	git -C "${DOT_REPO_DIR}" pull origin "${GET_BRANCH}"
 }
 
 dot_push() {
 	show_diff_check
-	dot_repo="${DOT_PARENT_DIR}/$(basename "${DOT_REPO}")"
 	changed_files=$(git -C "$dot_repo" --no-pager diff --name-only)
 	if [[ ${#changed_files} != 0 ]]; then
-		printf "\n%s\n" "${BOLD}Following dotfiles changed${RESET}"
-		git -C "$dot_repo" add -A
+		printf "\n%s" "${BOLD}Following dotfiles changed${RESET}"
+		git -C "${DOT_REPO_DIR}" add -A
 		echo "${BOLD}Enter Commit message (Ctrl + d to save): ${RESET}"
 		commit=$(</dev/stdin)
 		printf "\n"
-		git -C "$dot_repo" commit -m "$commit"
+		git -C "${DOT_REPO_DIR}" commit -m "$commit"
 
 		# Run Git Push
-		git -C "$dot_repo" push
+		git -C "${DOT_REPO_DIR}" push
 	else
-		printf "\n%s\n" "${BOLD}No Changes in dotfiles.${RESET}";; return
+		printf "\n%s\n" "${BOLD}No Changes in dotfiles.${RESET}"
+		return
 	fi
 }
 
