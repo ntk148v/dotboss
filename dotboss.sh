@@ -224,9 +224,9 @@ setup_automatic() {
 
 start_gitwatch() {
 	printf "\n%s\n" "${BOLD}Start a gitwatch process in background${RESET}"
-	nohup gitwatch -r ${DOT_REPO_REMOTE} -b ${DOT_REPO_BRANCH} ${DOT_REPO_DIR}) &
+	nohup gitwatch -r ${DOT_REPO_REMOTE} -b ${DOT_REPO_BRANCH} ${DOT_REPO_DIR} &
 	printf "\n%s\n" "${BOLD}Create init file to start gitwatch at startup (require ${BOLD}root priviledge${RESET})"
-	sudo echo "nohup gitwatch -r origin -b master ${DOT_REPO_DIR}) &" >/etc/init.d/dotboss_gitwatch
+	sudo echo "nohup gitwatch -r origin -b master ${DOT_REPO_DIR} &" >/etc/init.d/dotboss_gitwatch
 	sudo chmod a+x /etc/init.d/dotboss_gitwatch
 }
 
