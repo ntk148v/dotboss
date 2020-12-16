@@ -15,7 +15,7 @@ if ! command -v tput &>/dev/null; then
 	FG_ORANGE=""
 	BG_AQUA=""
 	FG_BLACK=""
-	FG_ORANGE=""
+	FG_ORANGE2=""
 	UL=""
 	RUL=""
 else
@@ -25,13 +25,13 @@ else
 	FG_ORANGE=$(tput setaf 208)
 	BG_AQUA=$(tput setab 45)
 	FG_BLACK=$(tput setaf 16)
-	FG_ORANGE=$(tput setaf 214)
+	FG_ORANGE2=$(tput setaf 214)
 	UL=$(tput smul)
 	RUL=$(tput rmul)
 fi
 
 logo() {
-	# print dotman logo
+	# print dotboss logo
 	printf "${BOLD}${FG_SKYBLUE}%s\n" ""
 	printf "%s\n" "                                                                          "
 	printf "%s\n" " ________   _____________________________ ________    _________ _________ "
@@ -99,15 +99,19 @@ init_check() {
 initial_setup() {
 	printf "\n\n%s\n" "First time use 🔥, spend time to do a ${BOLD}dotboss setup${RESET}"
 	printf "%s\n" "..................................................."
+	printf "%s\n"
+	printf "%s\n" "${BOLD}${FG_ORANGE}NOTE:${RESET} Your dotfiles folder has to contain a subfolder named ${FG_ORANGE2}home${RESET}"
+	printf "%s\n"
 	read -p "➤ Enter dotfiles repository URL: " -r DOT_REPO
-	read -p "➤ Where should I clone ${BOLD}$(basename "${DOT_REPO}")${RESET} (${HOME}/..): " -r DOT_DEST
+	read -p "➤ Where should I clone ${BOLD}$(basename "${DOT_REPO}")${RESET}, please enter absolute path (${HOME} by default): " -r DOT_DEST
 	read -p "➤ Enter the repository remote ('origin' by default): " -r DOT_REPO_REMOTE
 	read -p "➤ Enter the repository branch ('master' by default): " -r DOT_REPO_BRANCH
 	DOT_DEST=${DOT_DEST:-$HOME}
 	DOT_REPO_REMOTE=${DOT_REPO_REMOTE:-"origin"}
 	DOT_REPO_BRANCH=${DOT_REPO_BRANCH:-"master"}
 
-	if [[ -d "$HOME/$DOT_DEST" ]]; then
+	# check DOT_DEST is directory and it is an absolute path
+	if [[ -d "$DOT_DEST" && ("${DOT_DEST:0:1}" == / || "${DOT_DEST:0:2}" == ~[/a-z]) ]]; then
 		printf "\n%s\r\n" "${BOLD}Calling 📞 Git ... ${RESET}"
 		clone_dotrepo "$DOT_DEST" "$DOT_REPO" "$DOT_REPO_REMOTE" "$DOT_REPO_BRANCH"
 		printf "\n%s\n" "Open a new terminal or source your shell config"
@@ -124,11 +128,11 @@ clone_dotrepo() {
 	DOT_REPO_REMOTE=$3
 	DOT_REPO_BRANCH=$4
 
-	if git -C "${HOME}/${DOT_DEST}" clone "${DOT_REPO}"; then
+	if git -C "${DOT_DEST}" clone "${DOT_REPO}"; then
 		if [[ $DOT_REPO && $DOT_DEST ]]; then
 			add_env "$DOT_REPO" "$DOT_DEST" "$DOT_REPO_REMOTE" "$DOT_REPO_BRANCH"
 		fi
-		printf "\n%s" "[✔️ ] dotman successfully configured"
+		printf "\n%s" "[✔️] dotboss successfully configured"
 	else
 		# invalid arguments to exit, Repository Not Found
 		printf "\n%s" "[❌] $DOT_REPO Unavailable. Exiting !"
@@ -162,10 +166,10 @@ repo_check() {
 
 	DOT_REPO_NAME=$(basename "${DOT_REPO}")
 	# all paths are relative to HOME
-	if [[ -d ${HOME}/${DOT_DEST}/${DOT_REPO_NAME} ]]; then
+	if [[ -d ${DOT_DEST}/${DOT_REPO_NAME} ]]; then
 		printf "\n%s\n" "Found ${BOLD}${DOT_REPO_NAME}${RESET} as dotfile repo in ${BOLD}~/${DOT_DEST}/${RESET}"
 	else
-		printf "\n\n%s\n" "[❌] ${BOLD}${DOT_REPO_NAME}${RESET} not present inside path ${BOLD}${HOME}/${DOT_DEST}${RESET}"
+		printf "\n\n%s\n" "[❌] ${BOLD}${DOT_REPO_NAME}${RESET} not present inside path ${BOLD}${DOT_DEST}${RESET}"
 		read -p "Should I clone it ? [Y/n]: " -n 1 -r USER_INPUT
 		USER_INPUT=${USER_INPUT:-y}
 		case $USER_INPUT in
@@ -217,10 +221,22 @@ setup_manual() {
 	done
 }
 
+show_diff_check() {
+	printf "\n%s\n" "${BOLD}Check git status & git diff...${RESET}"
+	dot_repo="${DOT_DEST}/$(basename "${DOT_REPO}")"
+	dot_repo="$PWD"
+	printf "\n%s\n" "${BOLD}List all file changed${RESET}"
+	changed_files=$(git -C "$dot_repo" --no-pager diff --name-only)
+	printf "\n%s\n" "$changed_files"
+	changes=$(git -C "$dot_repo" --no-pager diff --color)
+	printf "\n%s\n" "${BOLD}List all changes${RESET}"
+	printf "\n%s\n" "$changes"
+}
+
 dot_pull() {
 	# pull changes (if any) from the remote repo
 	printf "\n%s\n" "${BOLD}Pulling dotfiles ...${RESET}"
-	dot_repo="${HOME}/${DOT_DEST}/$(basename "${DOT_REPO}")"
+	dot_repo="${DOT_DEST}/$(basename "${DOT_REPO}")"
 	printf "\n%s\n" "Pulling changes in $dot_repo"
 	GET_BRANCH=$(git remote show origin | awk '/HEAD/ {print $3}')
 	printf "\n%s\n" "Pulling from ${BOLD}${GET_BRANCH}"
@@ -228,14 +244,24 @@ dot_pull() {
 }
 
 dot_push() {
+	show_diff_check
+	dot_repo="${DOT_DEST}/$(basename "${DOT_REPO}")"
+	dot_repo="$PWD"
+	changed_files=$(git -C "$dot_repo" --no-pager diff --name-only)
+	if [[ ${#changed_files} != 0 ]]; then
+		printf "\n%s\n" "${BOLD}Following dotfiles changed${RESET}"
+		git -C "$dot_repo" add -A
+		echo "${BOLD}Enter Commit message (Ctrl + d to save): ${RESET}"
+		commit=$(</dev/stdin)
+		printf "\n"
+		git -C "$dot_repo" commit -m "$commit"
 
-}
-
-show_diff_check() {
-	printf "\n%s\n" "${BOLD}Check git status & git diff ...${RESET}"
-	dot_repo="${HOME}/${DOT_DEST}/$(basename "${DOT_REPO}")"
-	git -C "$dot_repo" status
-	git -C "$dot_repo" diff
+		# Run Git Push
+		git -C "$dot_repo" push
+	else
+		printf "\n%s\n" "${BOLD}No Changes in dotfiles.${RESET}"
+		return
+	fi
 }
 
 manage() {
@@ -261,5 +287,6 @@ manage() {
 	done
 }
 
-intro
-init_check
+dot_push
+# intro
+# init_check
