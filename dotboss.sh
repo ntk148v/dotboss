@@ -224,7 +224,6 @@ setup_manual() {
 show_diff_check() {
 	printf "\n%s\n" "${BOLD}Check git status & git diff...${RESET}"
 	dot_repo="${DOT_DEST}/$(basename "${DOT_REPO}")"
-	dot_repo="$PWD"
 	printf "\n%s\n" "${BOLD}List all file changed${RESET}"
 	changed_files=$(git -C "$dot_repo" --no-pager diff --name-only)
 	printf "\n%s\n" "$changed_files"
@@ -246,7 +245,6 @@ dot_pull() {
 dot_push() {
 	show_diff_check
 	dot_repo="${DOT_DEST}/$(basename "${DOT_REPO}")"
-	dot_repo="$PWD"
 	changed_files=$(git -C "$dot_repo" --no-pager diff --name-only)
 	if [[ ${#changed_files} != 0 ]]; then
 		printf "\n%s\n" "${BOLD}Following dotfiles changed${RESET}"
@@ -287,6 +285,5 @@ manage() {
 	done
 }
 
-dot_push
-# intro
-# init_check
+intro
+init_check
