@@ -33,14 +33,14 @@ fi
 logo() {
 	# print dotboss logo
 	printf "${BOLD}${FG_SKYBLUE}%s\n" ""
-	printf "%s\n" "                                                                          "
-	printf "%s\n" " ________   _____________________________ ________    _________ _________ "
-	printf "%s\n" " \______ \  \_____  \__    ___/\______   \\_____  \  /   _____//   _____/ "
-	printf "%s\n" "  |    |  \  /   |   \|    |    |    |  _/ /   |   \ \_____  \ \_____  \  "
-	printf "%s\n" "  |    |   \/    |    \    |    |    |   \/    |    \/        \/        \ "
-	printf "%s\n" " /_______  /\_______  /____|    |______  /\_______  /_______  /_______  / "
-	printf "%s\n" "         \/         \/                 \/         \/        \/        \/  "
-	printf "%s\n" "                                                                          "
+	printf "%s\n" "                                                                           "
+	printf "%s\n" " ________   _____________________________ ________    _________ _________  "
+	printf "%s\n" " \______ \  \_____  \__    ___/\______   \\\_____  \  /   _____//   _____/ "
+	printf "%s\n" "  |    |  \  /   |   \|    |    |    |  _/ /   |   \ \_____  \ \_____  \   "
+	printf "%s\n" "  |    |   \/    |    \    |    |    |   \/    |    \/        \/        \  "
+	printf "%s\n" " /_______  /\_______  /____|    |______  /\_______  /_______  /_______  /  "
+	printf "%s\n" "         \/         \/                 \/         \/        \/        \/   "
+	printf "%s\n" "                                                                           "
 	printf "${RESET}\n%s" ""
 }
 
@@ -87,7 +87,7 @@ intro() {
 
 init_check() {
 	# Check whether its a first time use or not
-	if [[ -z ${DOT_REPO} && -z ${DOT_DEST} ]]; then
+	if [[ -z ${DOT_REPO} && -z ${DOT_PARENT_DIR} ]]; then
 		initial_setup
 		goodbye
 	else
@@ -103,34 +103,34 @@ initial_setup() {
 	printf "%s\n" "${BOLD}${FG_ORANGE}NOTE:${RESET} Your dotfiles folder has to contain a subfolder named ${FG_ORANGE2}home${RESET}"
 	printf "%s\n"
 	read -p "➤ Enter dotfiles repository URL: " -r DOT_REPO
-	read -p "➤ Where should I clone ${BOLD}$(basename "${DOT_REPO}")${RESET}, please enter absolute path (${HOME} by default): " -r DOT_DEST
+	read -p "➤ Where should I clone ${BOLD}$(basename "${DOT_REPO}")${RESET}, please enter absolute path (${HOME} by default): " -r DOT_PARENT_DIR
 	read -p "➤ Enter the repository remote ('origin' by default): " -r DOT_REPO_REMOTE
 	read -p "➤ Enter the repository branch ('master' by default): " -r DOT_REPO_BRANCH
-	DOT_DEST=${DOT_DEST:-$HOME}
+	DOT_PARENT_DIR=${DOT_PARENT_DIR:-$HOME}
 	DOT_REPO_REMOTE=${DOT_REPO_REMOTE:-"origin"}
 	DOT_REPO_BRANCH=${DOT_REPO_BRANCH:-"master"}
 
-	# check DOT_DEST is directory and it is an absolute path
-	if [[ -d "$DOT_DEST" && ("${DOT_DEST:0:1}" == / || "${DOT_DEST:0:2}" == ~[/a-z]) ]]; then
+	# check DOT_PARENT_DIR is directory and it is an absolute path
+	if [[ -d "$DOT_PARENT_DIR" && ("${DOT_PARENT_DIR:0:1}" == / || "${DOT_PARENT_DIR:0:2}" == ~[/a-z]) ]]; then
 		printf "\n%s\r\n" "${BOLD}Calling 📞 Git ... ${RESET}"
-		clone_dotrepo "$DOT_DEST" "$DOT_REPO" "$DOT_REPO_REMOTE" "$DOT_REPO_BRANCH"
+		clone_dotrepo "$DOT_PARENT_DIR" "$DOT_REPO" "$DOT_REPO_REMOTE" "$DOT_REPO_BRANCH"
 		printf "\n%s\n" "Open a new terminal or source your shell config"
 	else
-		printf "\n%s" "[❌]${BOLD}$DOT_DEST${RESET} Not a Valid directory"
+		printf "\n%s" "[❌]${BOLD}$DOT_PARENT_DIR${RESET} Not a Valid directory"
 		exit 1
 	fi
 }
 
 clone_dotrepo() {
 	# clone the repo in the destination directory
-	DOT_DEST=$1
+	DOT_PARENT_DIR=$1
 	DOT_REPO=$2
 	DOT_REPO_REMOTE=$3
 	DOT_REPO_BRANCH=$4
 
-	if git -C "${DOT_DEST}" clone "${DOT_REPO}"; then
-		if [[ $DOT_REPO && $DOT_DEST ]]; then
-			add_env "$DOT_REPO" "$DOT_DEST" "$DOT_REPO_REMOTE" "$DOT_REPO_BRANCH"
+	if git -C "${DOT_PARENT_DIR}" clone "${DOT_REPO}"; then
+		if [[ $DOT_REPO && $DOT_PARENT_DIR ]]; then
+			add_env "$DOT_REPO" "$DOT_PARENT_DIR" "$DOT_REPO_REMOTE" "$DOT_REPO_BRANCH"
 		fi
 		printf "\n%s" "[✔️] dotboss successfully configured"
 	else
@@ -141,20 +141,20 @@ clone_dotrepo() {
 }
 
 add_env() {
-	[[ "$DOT_DEST" && "$DOT_REPO" && "$DOT_REPO_REMOTE" && "$DOT_REPO_BRANCH" ]] && return
+	[[ "$DOT_PARENT_DIR" && "$DOT_REPO" && "$DOT_REPO_REMOTE" && "$DOT_REPO_BRANCH" ]] && return
 	# export environment variables
-	printf "\n%s\n" "Exporting env variables DOT_DEST, DOT_REPO, DOT_REPO_REMOTE & DOT_REPO_BRANCH ..."
+	printf "\n%s\n" "Exporting env variables DOT_PARENT_DIR, DOT_REPO, DOT_REPO_REMOTE & DOT_REPO_BRANCH ..."
 
 	current_shell=$(basename "$SHELL")
 	if [[ $current_shell == "zsh" ]]; then
 		echo "# Dotboss configs" >>"$HOME"/.zshrc
-		echo "export DOT_REPO=$1 DOT_DEST=$2 DOT_REPO_REMOTE=$3 DOT_REPO_BRANCH=$4" >>"$HOME"/.zshrc
+		echo "export DOT_REPO=$1 DOT_PARENT_DIR=$2 DOT_REPO_REMOTE=$3 DOT_REPO_BRANCH=$4" >>"$HOME"/.zshrc
 	elif [[ $current_shell == "bash" ]]; then
 		# assume we have a fallback to bash
 		echo "# Dotboss configs" >>"$HOME"/.bashrc
-		echo "export DOT_REPO=$1 DOT_DEST=$2 DOT_REPO_REMOTE=$3 DOT_REPO_BRANCH=$4" >>"$HOME"/.bashrc
+		echo "export DOT_REPO=$1 DOT_PARENT_DIR=$2 DOT_REPO_REMOTE=$3 DOT_REPO_BRANCH=$4" >>"$HOME"/.bashrc
 	else
-		echo "Couldn't export ${BOLD}DOT_REPO=$1${RESET} and ${BOLD}DOT_DEST=$2${RESET}"
+		echo "Couldn't export ${BOLD}DOT_REPO=$1${RESET} and ${BOLD}DOT_PARENT_DIR=$2${RESET}"
 		echo "Consider exporting them manually."
 		exit 1
 	fi
@@ -162,18 +162,18 @@ add_env() {
 }
 
 repo_check() {
-	# check if dotfile repo is present inside DOT_DEST
+	# check if dotfile repo is present inside DOT_PARENT_DIR
 
 	DOT_REPO_NAME=$(basename "${DOT_REPO}")
 	# all paths are relative to HOME
-	if [[ -d ${DOT_DEST}/${DOT_REPO_NAME} ]]; then
-		printf "\n%s\n" "Found ${BOLD}${DOT_REPO_NAME}${RESET} as dotfile repo in ${BOLD}~/${DOT_DEST}/${RESET}"
+	if [[ -d ${DOT_PARENT_DIR}/${DOT_REPO_NAME} ]]; then
+		printf "\n%s\n" "Found ${BOLD}${DOT_REPO_NAME}${RESET} as dotfile repo in ${BOLD}~/${DOT_PARENT_DIR}/${RESET}"
 	else
-		printf "\n\n%s\n" "[❌] ${BOLD}${DOT_REPO_NAME}${RESET} not present inside path ${BOLD}${DOT_DEST}${RESET}"
+		printf "\n\n%s\n" "[❌] ${BOLD}${DOT_REPO_NAME}${RESET} not present inside path ${BOLD}${DOT_PARENT_DIR}${RESET}"
 		read -p "Should I clone it ? [Y/n]: " -n 1 -r USER_INPUT
 		USER_INPUT=${USER_INPUT:-y}
 		case $USER_INPUT in
-		[y/Y]*) clone_dotrepo "$DOT_DEST" "$DOT_REPO" ;;
+		[y/Y]*) clone_dotrepo "$DOT_PARENT_DIR" "$DOT_REPO" ;;
 		[n/N]*) printf "\n%s" "${BOLD}${DOT_REPO_NAME}${RESET} not found" ;;
 		*) printf "\n%s\n" "[❌] Invalid Input 🙄, Try Again" ;;
 		esac
@@ -181,21 +181,39 @@ repo_check() {
 }
 
 setup_stow() {
-	[[ "$DOT_DEST" && "$DOT_REPO" && "$DOT_REPO_REMOTE" && "$DOT_REPO_BRANCH" ]] && return
-	DOT_REPO_NAME=$(basename "${DOT_REPO}")
-	printf "\n%s\n" "Your current dotfiles in ${BOLD}${DOT_DEST}${RESET}"
-	tree ${DOT_DEST}/${DOT_REPO_NAME}
+	[[ "$DOT_PARENT_DIR" && "$DOT_REPO" && "$DOT_REPO_REMOTE" && "$DOT_REPO_BRANCH" ]] && return
+	DOT_REPO_NAME=$(basename "${DOT_REPO}")❌
+	printf "\n%s\n" "Your current dotfiles in ${BOLD}${DOT_PARENT_DIR}${RESET}"
+	tree ${DOT_PARENT_DIR}/${DOT_REPO_NAME}/o
 	printf "\n%s\n" "Execute stow command..."
 	# force create symbol link
-	# When stowing, if a target is encountered which already exists but is a plain file (and hence not owned by any existing stow package), then normally Stow will register this as a
-	# conflict and refuse to proceed.  This option changes that behaviour so that the file is moved to the same relative place within the package's installation image within the stow
-	# directory, and then stowing proceeds as before.  So effectively, the file becomes adopted by the stow package, without its contents changing.
+	# for more details, please check `man stow`
 	stow -v --adopt -t "${HOME}" ${DOT_REPO_NAME}
 	printf "\n"
 }
 
 setup_automatic() {
 	printf "\n%s\n" "${BOLD}Setup automatic...${RESET}"
+	printf "\n%s\n" "Check if there are gitwatch processes is running"
+	gitwatch_proc=$(ps -ef | grep "gitwatch" | grep -v "grep")
+	if [[ ${#gitwatch_proc} != 0 ]]; then
+		printf "\n%s\n" "Found gitwatch processes is running"
+
+	fi
+}
+
+start_gitwatch() {
+	printf "\n%s\n" "${BOLD}Start a gitwatch process in background${RESET}"
+	nohup gitwatch -r origin -b master ${DOT_PARENT_DIR}/$(basename "${DOT_REPO}") &
+	printf "\n%s\n" "${BOLD}Create init file to start gitwatch at startup (require ${BOLD}root priviledge${RESET})"
+	sudo echo "nohup gitwatch -r origin -b master ${DOT_PARENT_DIR}/$(basename "${DOT_REPO}") &" > /etc/init.d/dotboss_gitwatch
+	sudo chmod a+x /etc/init.d/dotboss_gitwatch
+}
+
+kill_gitwatch() {
+	printf "\n%s\n" "${BOLD}Kill a gitwatch process in background${RESET}"
+	ps -ef | grep "gitwatch" | grep -v "grep" | awk '{print $2}' | xargs kill -9
+	printf "\n%s\n" "${BOLD}Killed! 💀${RESET}"
 }
 
 setup_manual() {
@@ -223,7 +241,7 @@ setup_manual() {
 
 show_diff_check() {
 	printf "\n%s\n" "${BOLD}Check git status & git diff...${RESET}"
-	dot_repo="${DOT_DEST}/$(basename "${DOT_REPO}")"
+	dot_repo="${DOT_PARENT_DIR}/$(basename "${DOT_REPO}")"
 	printf "\n%s\n" "${BOLD}List all file changed${RESET}"
 	changed_files=$(git -C "$dot_repo" --no-pager diff --name-only)
 	printf "\n%s\n" "$changed_files"
@@ -235,7 +253,7 @@ show_diff_check() {
 dot_pull() {
 	# pull changes (if any) from the remote repo
 	printf "\n%s\n" "${BOLD}Pulling dotfiles ...${RESET}"
-	dot_repo="${DOT_DEST}/$(basename "${DOT_REPO}")"
+	dot_repo="${DOT_PARENT_DIR}/$(basename "${DOT_REPO}")"
 	printf "\n%s\n" "Pulling changes in $dot_repo"
 	GET_BRANCH=$(git remote show origin | awk '/HEAD/ {print $3}')
 	printf "\n%s\n" "Pulling from ${BOLD}${GET_BRANCH}"
@@ -244,7 +262,7 @@ dot_pull() {
 
 dot_push() {
 	show_diff_check
-	dot_repo="${DOT_DEST}/$(basename "${DOT_REPO}")"
+	dot_repo="${DOT_PARENT_DIR}/$(basename "${DOT_REPO}")"
 	changed_files=$(git -C "$dot_repo" --no-pager diff --name-only)
 	if [[ ${#changed_files} != 0 ]]; then
 		printf "\n%s\n" "${BOLD}Following dotfiles changed${RESET}"
@@ -257,8 +275,7 @@ dot_push() {
 		# Run Git Push
 		git -C "$dot_repo" push
 	else
-		printf "\n%s\n" "${BOLD}No Changes in dotfiles.${RESET}"
-		return
+		printf "\n%s\n" "${BOLD}No Changes in dotfiles.${RESET}";; return
 	fi
 }
 
