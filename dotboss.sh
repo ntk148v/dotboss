@@ -190,9 +190,11 @@ setup_stow() {
 	printf "\n%s\n" "Your current dotfiles in ${BOLD}${DOT_REPO_DIR}${RESET}"
 	tree ${DOT_REPO_DIR}/home
 	printf "\n%s\n" "Execute stow command..."
+	cd ${DOT_REPO_DIR}
 	# force create symbol link
 	# for more details, please check `man stow`
 	stow -v --adopt -t "${HOME}" ${DOT_REPO_NAME}
+	cd -
 }
 
 setup_automatic() {
