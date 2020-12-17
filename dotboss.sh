@@ -127,8 +127,9 @@ clone_dotrepo() {
 	DOT_REPO=$2
 	DOT_REPO_REMOTE=$3
 	DOT_REPO_BRANCH=$4
+	DOT_REPO_NAME=$(basename "${DOT_REPO}")
 
-	if git -C "${DOT_PARENT_DIR}" clone "${DOT_REPO}"; then
+	if git clone "${DOT_REPO}" ${DOT_PARENT_DIR}/$DOT_REPO_NAME; then
 		if [[ "$DOT_PARENT_DIR" && "$DOT_REPO" && "$DOT_REPO_REMOTE" && "$DOT_REPO_BRANCH" ]]; then
 			add_env "$DOT_REPO" "$DOT_PARENT_DIR" "$DOT_REPO_REMOTE" "$DOT_REPO_BRANCH"
 		fi
