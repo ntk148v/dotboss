@@ -197,6 +197,11 @@ setup_stow() {
 
 setup_automatic() {
 	printf "\n%s\n" "${BOLD}Setup automatic...${RESET}"
+	printf "\n%s" ".................."
+	printf "%s\n"
+	printf "%s\n" "${BOLD}${FG_ORANGE}NOTE:${RESET} To use this feature, you have to configure git user (email & name)"
+	printf "%s\n" "      You also have to use git to allow push without entering username & password!"
+	printf "%s\n"
 	printf "\n%s\n" "Check if there are gitwatch processes is running"
 	gitwatch_proc=$(ps -ef | grep "gitwatch" | grep -v "grep")
 	if [[ ${#gitwatch_proc} != 0 ]]; then
@@ -227,9 +232,11 @@ setup_automatic() {
 
 start_gitwatch() {
 	printf "\n%s\n" "${BOLD}Start a gitwatch process in background${RESET}"
-	nohup gitwatch -r ${DOT_REPO_REMOTE} -b ${DOT_REPO_BRANCH} ${DOT_REPO_DIR} &
+	mkdir -p $HOME/.dotboss_log
+	nohup gitwatch -r ${DOT_REPO_REMOTE} -b ${DOT_REPO_BRANCH} ${DOT_REPO_DIR} & > $HOME/.dotboss_log/watch.log
+	printf "\n%s" "The process's output logging can be found here - ${BOLD}$HOME/.dotboss_log/watch.log${RESET}"
 	printf "\n%s\n" "${BOLD}Create init file to start gitwatch at startup (require ${BOLD}root priviledge${RESET})"
-	sudo echo "nohup gitwatch -r origin -b master ${DOT_REPO_DIR} &" >/etc/init.d/dotboss_gitwatch
+	sudo echo "nohup gitwatch -r origin -b master ${DOT_REPO_DIR} & > $HOME/.dotboss_log/watch.log" >/etc/init.d/dotboss_gitwatch
 	sudo chmod a+x /etc/init.d/dotboss_gitwatch
 }
 
