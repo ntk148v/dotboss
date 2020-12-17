@@ -37,12 +37,14 @@ dotboss is a easy to use dotfiles manager.
   - `bash >= 3`
   - `git`
   - `tree`
+  - [`gitwatch`](https://github.com/gitwatch/gitwatch)
+  - [`inotify-tools`](https://github.com/rvoicilas/inotify-tools)
 
 - Grab [dotboss.sh](./dotboss.sh) and store it (ideally please store it in PATH folders to call it from anywhere)
 - Change file permissions to be executable.
 
 ```bash
-chmod a+x dotboss.sh
+$ chmod a+x dotboss.sh
 ```
 
 ## 4. Usage
@@ -50,7 +52,7 @@ chmod a+x dotboss.sh
 Just run `dotboss` anywhere in your terminal.
 
 ```bash
-dotboss
+$ dotboss
 
 
 Hi kiennt 👋
