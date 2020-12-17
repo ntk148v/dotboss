@@ -81,7 +81,7 @@ goodbye() {
 
 intro() {
 	BOSS_NAME=$LOGNAME
-	printf "\n\a%s" "Hi ${BOLD}${FG_ORANGE}${BOSS_NAME}${RESET} 👋"
+	printf "\n\a%s" "Hi ${BOLD}${FG_ORANGE}${BOSS_NAME}${RESET} 👋, welcome to ${BOLD}${FG_SKYBLUE}dotboss ${VERSION}${RESET}"
 	logo
 }
 
@@ -99,9 +99,9 @@ init_check() {
 initial_setup() {
 	printf "\n\n%s\n" "First time use 🔥, spend time to do a ${BOLD}dotboss setup${RESET}"
 	printf "%s\n" "..................................................."
-	printf "%s\n"
+	printf "\n"
 	printf "%s\n" "${BOLD}${FG_ORANGE}NOTE:${RESET} Your dotfiles folder has to contain a subfolder named ${FG_ORANGE2}home${RESET}"
-	printf "%s\n"
+	printf "\n"
 	read -p "➤ Enter dotfiles repository URL: " -r DOT_REPO
 	read -p "➤ Where should I clone ${BOLD}$(basename "${DOT_REPO}")${RESET}, please enter absolute path (${HOME} by default): " -r DOT_PARENT_DIR
 	read -p "➤ Enter the repository remote ('origin' by default): " -r DOT_REPO_REMOTE
@@ -129,7 +129,7 @@ clone_dotrepo() {
 	DOT_REPO_BRANCH=$4
 	DOT_REPO_NAME=$(basename "${DOT_REPO}")
 
-	if git clone "${DOT_REPO}" ${DOT_PARENT_DIR}/$DOT_REPO_NAME; then
+	if git clone "${DOT_REPO}" "${DOT_PARENT_DIR}"/"${DOT_REPO_NAME}"; then
 		if [[ "$DOT_PARENT_DIR" && "$DOT_REPO" && "$DOT_REPO_REMOTE" && "$DOT_REPO_BRANCH" ]]; then
 			add_env "$DOT_REPO" "$DOT_PARENT_DIR" "$DOT_REPO_REMOTE" "$DOT_REPO_BRANCH"
 		fi
@@ -188,19 +188,19 @@ repo_check() {
 
 setup_stow() {
 	printf "\n%s\n" "Your current dotfiles in ${BOLD}${DOT_REPO_DIR}${RESET}"
-	tree ${DOT_REPO_DIR}/home
+    tree "${DOT_REPO_DIR}"/home
 	printf "\n%s\n" "Execute stow command..."
-	cd ${DOT_REPO_DIR}
+    cd "${DOT_REPO_DIR}" || return
 	# force create symbol link
 	# for more details, please check `man stow`
-	stow -v --adopt -t "${HOME}" ${DOT_REPO_NAME}
-	cd -
+    stow -v --adopt -t "${HOME}" "${DOT_REPO_NAME}"
+    cd - || return
 }
 
 setup_automatic() {
 	printf "\n%s\n" "${BOLD}Setup automatic...${RESET}"
 	printf "\n%s" ".................."
-	printf "%s\n"
+	printf "\n"
 	printf "%s\n" "${BOLD}${FG_ORANGE}NOTE:${RESET} To use this feature, you have to configure git user (email & name)"
 	printf "%s\n" "      You also have to use git to allow push without entering username & password!"
 	printf "%s\n"
@@ -234,11 +234,11 @@ setup_automatic() {
 
 start_gitwatch() {
 	printf "\n%s\n" "${BOLD}Start a gitwatch process in background${RESET}"
-	mkdir -p $HOME/.dotboss_log
-	nohup gitwatch -r ${DOT_REPO_REMOTE} -b ${DOT_REPO_BRANCH} ${DOT_REPO_DIR} > $HOME/.dotboss_log/watch.log &
+    mkdir -p "$HOME"/.dotboss_log
+    nohup gitwatch -r "${DOT_REPO_REMOTE}" -b "${DOT_REPO_BRANCH}" "${DOT_REPO_DIR}" > "$HOME"/.dotboss_log/watch.log &
 	printf "\n%s" "The process's output logging can be found here - ${BOLD}$HOME/.dotboss_log/watch.log${RESET}"
 	printf "\n%s\n" "${BOLD}Create init file to start gitwatch at startup (require ${BOLD}root priviledge${RESET})"
-	sudo echo "nohup gitwatch -r origin -b master ${DOT_REPO_DIR} > $HOME/.dotboss_log/watch.log &" >/etc/init.d/dotboss_gitwatch
+	sudo echo "nohup gitwatch -r "${DOT_REPO_REMOTE}" -b "${DOT_REPO_BRANCH}" "${DOT_REPO_DIR}" > "$HOME"/.dotboss_log/watch.log &" >/etc/init.d/dotboss_gitwatch
 	sudo chmod a+x /etc/init.d/dotboss_gitwatch
 }
 
