@@ -40,7 +40,7 @@ dotboss is a easy to use dotfiles manager.
   - [`gitwatch`](https://github.com/gitwatch/gitwatch)
   - [`inotify-tools`](https://github.com/rvoicilas/inotify-tools)
 
-- Grab [dotboss.sh](./dotboss.sh) and store it (ideally please store it in PATH folders to call it from anywhere)
+- Grab [dotboss.sh](./dotboss.sh) and store it (ideally please store it in PATH folders to call it from anywhere).
 - Change file permissions to be executable.
 
 ```bash
