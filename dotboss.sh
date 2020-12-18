@@ -253,7 +253,7 @@ setup_manual() {
 		printf "\n%s" "[${BOLD}1${RESET}] Show diff"
 		printf "\n%s" "[${BOLD}2${RESET}] Push changed dotfiles"
 		printf "\n%s" "[${BOLD}3${RESET}] Pull latest changes"
-		printf "\n%s\n" "[${BOLD}q/Q${RESET}] Quit Session"
+		printf "\n%s" "[${BOLD}q/Q${RESET}] Quit Session"
 		read -p "What do you want me to do ? [${BOLD}1${RESET}]: " -n 1 -r USER_INPUT
 		# Default choice is [1], See Parameter Expansion
 		USER_INPUT=${USER_INPUT:-1}
