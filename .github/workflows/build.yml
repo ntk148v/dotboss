@@ -20,4 +20,3 @@ jobs:
       # -n : ead  commands  but  do  not  execute  them.  This may be used to check a shell script for syntax errors.  This is ignored by interactive shells.
       run : |
           bash -n dotboss.sh
-          sh -n tools/install.sh
