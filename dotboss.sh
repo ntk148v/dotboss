@@ -236,8 +236,7 @@ start_gitwatch() {
 	nohup gitwatch -r "${DOT_REPO_REMOTE}" -b "${DOT_REPO_BRANCH}" "${DOT_REPO_DIR}" >"$HOME"/.dotboss_log/watch.log &
 	printf "\n%s" "The process's output logging can be found here - ${BOLD}$HOME/.dotboss_log/watch.log${RESET}"
 	printf "\n%s\n" "${BOLD}Create init file to start gitwatch at startup (require ${BOLD}root priviledge${RESET})"
-	sudo echo "nohup gitwatch -r "${DOT_REPO_REMOTE}" -b "${DOT_REPO_BRANCH}" "${DOT_REPO_DIR}" > "$HOME"/.dotboss_log/watch.log &" >/etc/init.d/dotboss_gitwatch
-	sudo echo "nohup gitwatch -r ""${DOT_REPO_REMOTE}"" -b ""${DOT_REPO_BRANCH}"" ""${DOT_REPO_DIR}"" > ""$HOME""/.dotboss_log/watch.log &" >/etc/init.d/dotboss_gitwatch
+	sudo echo "nohup gitwatch -r ""${DOT_REPO_REMOTE}"" -b ""${DOT_REPO_BRANCH}"" ""${DOT_REPO_DIR}"" > ""$HOME""/.dotboss_log/watch.log &" | sudo tee /etc/init.d/dotboss_gitwatch
 	sudo chmod a+x /etc/init.d/dotboss_gitwatch
 }
 
