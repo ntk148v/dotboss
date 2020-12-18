@@ -48,21 +48,21 @@ logo() {
 # check if git exists
 if ! command -v git &>/dev/null; then
 	printf "%s\n\n" "${BOLD}${FG_SKYBLUE}${RESET}"
-	echo "I can't live without Git 😞"
+	echo "[❌] I can't live without Git 😞"
 	exit 1
 fi
 
 # check if stow exists
 if ! command -v stow &>/dev/null; then
 	printf "%s\n\n" "${BOLD}${FG_SKYBLUE}${RESET}"
-	echo "I can't live without Stow 😞"
+	echo "[❌] I can't live without Stow 😞"
 	exit 1
 fi
 
 # check if tree exists
 if ! command -v tree &>/dev/null; then
 	printf "%s\n\n" "${BOLD}${FG_SKYBLUE}${RESET}"
-	echo "I can't live without Tree 😞"
+	echo "[❌] I can't live without Tree 😞"
 	exit 1
 fi
 
@@ -75,7 +75,7 @@ catch_ctrl+c() {
 trap 'catch_ctrl+c' SIGINT
 
 goodbye() {
-	printf "\a\n\n%s\n" "${BOLD}Thanks for using dotboss 🖖.${RESET}"
+	printf "\a\n\n%s\n" "🌟 ${BOLD}Thanks for using dotboss 🖖.${RESET}"
 	printf "%s\n" "${BOLD}Report Bugs 🐛 @ ${UL}https://github.com/ntk148v/dotboss/issues${RUL}${RESET}"
 }
 
@@ -97,7 +97,7 @@ init_check() {
 }
 
 initial_setup() {
-	printf "\n\n%s\n" "First time use 🔥, spend time to do a ${BOLD}dotboss setup${RESET}"
+	printf "\n\n%s\n" "🌟 First time use 🔥, spend time to do a ${BOLD}dotboss setup${RESET}"
 	printf "%s\n" "..................................................."
 	printf "\n"
 	printf "%s\n" "${BOLD}${FG_ORANGE}NOTE:${RESET} Your dotfiles folder has to contain a subfolder named ${FG_ORANGE2}home${RESET}"
@@ -112,7 +112,6 @@ initial_setup() {
 
 	# check DOT_PARENT_DIR is directory and it is an absolute path
 	if [[ -d "$DOT_PARENT_DIR" && ("${DOT_PARENT_DIR:0:1}" == / || "${DOT_PARENT_DIR:0:2}" == ~[/a-z]) ]]; then
-		printf "\n%s\r\n" "${BOLD}Calling 📞 Git ... ${RESET}"
 		clone_dotrepo "$DOT_PARENT_DIR" "$DOT_REPO" "$DOT_REPO_REMOTE" "$DOT_REPO_BRANCH"
 		printf "\n%s\n" "Open a new terminal or source your shell config"
 	else
@@ -128,7 +127,7 @@ clone_dotrepo() {
 	DOT_REPO_REMOTE=$3
 	DOT_REPO_BRANCH=$4
 	DOT_REPO_NAME=$(basename "${DOT_REPO}")
-
+	printf "\n%s\r\n" "${BOLD}🌟 Calling 📞 Git ... ${RESET}"
 	if git clone "${DOT_REPO}" "${DOT_PARENT_DIR}"/"${DOT_REPO_NAME}"; then
 		if [[ "$DOT_PARENT_DIR" && "$DOT_REPO" && "$DOT_REPO_REMOTE" && "$DOT_REPO_BRANCH" ]]; then
 			add_env "$DOT_REPO" "$DOT_PARENT_DIR" "$DOT_REPO_REMOTE" "$DOT_REPO_BRANCH"
@@ -147,7 +146,7 @@ add_env() {
 		return
 	fi
 	# export environment variables
-	printf "\n%s\n" "Exporting env variables DOT_PARENT_DIR, DOT_REPO, DOT_REPO_REMOTE & DOT_REPO_BRANCH ..."
+	printf "\n%s\n" "🌟 Exporting env variables DOT_PARENT_DIR, DOT_REPO, DOT_REPO_REMOTE & DOT_REPO_BRANCH ..."
 
 	current_shell=$(basename "$SHELL")
 	DOT_REPO_NAME=$(basename "${DOT_REPO}")
@@ -187,9 +186,10 @@ repo_check() {
 }
 
 setup_stow() {
-	printf "\n%s\n" "Your current dotfiles in ${BOLD}${DOT_REPO_DIR}${RESET}"
+	printf "\n%s\n" "🌟 ${BOLD}Setup stow...${RESET}"
+	printf "\n%s" "Your current dotfiles in ${BOLD}${DOT_REPO_DIR}${RESET}"
     tree "${DOT_REPO_DIR}"/home
-	printf "\n%s\n" "Execute stow command..."
+	printf "\n%s" "Execute stow command..."
     cd "${DOT_REPO_DIR}" || return
 	# force create symbol link
 	# for more details, please check `man stow`
@@ -198,8 +198,7 @@ setup_stow() {
 }
 
 setup_automatic() {
-	printf "\n%s\n" "${BOLD}Setup automatic...${RESET}"
-	printf "\n%s" ".................."
+	printf "\n%s\n" "🌟 ${BOLD}Setup automatic...${RESET}"
 	printf "\n"
 	printf "%s\n" "${BOLD}${FG_ORANGE}NOTE:${RESET} To use this feature, you have to configure git user (email & name)"
 	printf "%s\n" "      You also have to use git to allow push without entering username & password!"
@@ -233,7 +232,7 @@ setup_automatic() {
 }
 
 start_gitwatch() {
-	printf "\n%s\n" "${BOLD}Start a gitwatch process in background${RESET}"
+	printf "\n%s\n" "🌟 ${BOLD}Start a gitwatch process in background${RESET}"
     mkdir -p "$HOME"/.dotboss_log
     nohup gitwatch -r "${DOT_REPO_REMOTE}" -b "${DOT_REPO_BRANCH}" "${DOT_REPO_DIR}" > "$HOME"/.dotboss_log/watch.log &
 	printf "\n%s" "The process's output logging can be found here - ${BOLD}$HOME/.dotboss_log/watch.log${RESET}"
@@ -243,13 +242,14 @@ start_gitwatch() {
 }
 
 kill_gitwatch() {
-	printf "\n%s\n" "${BOLD}Kill a gitwatch process in background${RESET}"
+	printf "\n%s\n" "🌟 ${BOLD}Kill a gitwatch process in background${RESET}"
 	ps -ef | grep "gitwatch" | grep -v "grep" | awk '{print $2}' | xargs kill -9
 	printf "\n%s\n" "${BOLD}Killed! 💀${RESET}"
 }
 
 setup_manual() {
-	printf "\n%s\n" "${BOLD}Setup manual...${RESET}"
+	printf "\n%s\n" "🌟 ${BOLD}Setup manual...${RESET}"
+	printf "\n"
 	while :; do
 		printf "\n%s" "[${BOLD}1${RESET}] Show diff"
 		printf "\n%s" "[${BOLD}2${RESET}] Push changed dotfiles"
@@ -272,7 +272,7 @@ setup_manual() {
 }
 
 show_diff_check() {
-	printf "\n%s\n" "${BOLD}Check git status & git diff...${RESET}"
+	printf "\n%s\n" "🌟 ${BOLD}Check git status & git diff...${RESET}"
 	printf "\n%s" "${BOLD}List all file changed${RESET}"
 	changed_files=$(git -C "${DOT_REPO_DIR}" --no-pager diff --name-only)
 	printf "\n%s" "$changed_files"
@@ -283,7 +283,7 @@ show_diff_check() {
 
 dot_pull() {
 	# pull changes (if any) from the remote repo
-	printf "\n%s\n" "${BOLD}Pulling dotfiles ...${RESET}"
+	printf "\n%s\n" "🌟 ${BOLD}Pulling dotfiles ...${RESET}"
 	printf "\n%s\n" "Pulling changes in ${DOT_REPO_DIR}"
 	GET_BRANCH=$(git remote show origin | awk '/HEAD/ {print $3}')
 	printf "\n%s\n" "Pulling from ${BOLD}${GET_BRANCH}"
@@ -292,6 +292,7 @@ dot_pull() {
 
 dot_push() {
 	show_diff_check
+	printf "\n%s\n" "🌟 ${BOLD}Pushing dotfiles ...${RESET}"
 	changed_files=$(git -C "$dot_repo" --no-pager diff --name-only)
 	if [[ ${#changed_files} != 0 ]]; then
 		printf "\n%s" "${BOLD}Following dotfiles changed${RESET}"
@@ -317,7 +318,7 @@ manage() {
 		printf "\n%s\n" "[${BOLD}1${RESET}] Automatic mode with gitwatch"
 		printf "\n%s\n" "[${BOLD}2${RESET}] Manual mode"
 		printf "\n%s\n" "[${BOLD}q/Q${RESET}] Quit Session"
-		read -p "What do you want me to do? [${BOLD}1${RESET}]: " -n 1 -r USER_INPUT
+		read -p "\nWhat do you want me to do? [${BOLD}1${RESET}]: " -n 1 -r USER_INPUT
 		# Default choice is [1], See Parameter Expansion
 		USER_INPUT=${USER_INPUT:-1}
 		case $USER_INPUT in
