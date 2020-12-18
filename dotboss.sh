@@ -13,8 +13,8 @@ if ! command -v tput &>/dev/null; then
 	RESET=""
 	FG_SKYBLUE=""
 	FG_ORANGE=""
-	BG_AQUA=""
-	FG_BLACK=""
+	# BG_AQUA=""
+	# FG_BLACK=""
 	FG_ORANGE2=""
 	UL=""
 	RUL=""
@@ -23,8 +23,8 @@ else
 	RESET=$(tput sgr0)
 	FG_SKYBLUE=$(tput setaf 122)
 	FG_ORANGE=$(tput setaf 208)
-	BG_AQUA=$(tput setab 45)
-	FG_BLACK=$(tput setaf 16)
+	# BG_AQUA=$(tput setab 45)
+	# FG_BLACK=$(tput setaf 16)
 	FG_ORANGE2=$(tput setaf 214)
 	UL=$(tput smul)
 	RUL=$(tput rmul)
@@ -48,21 +48,21 @@ logo() {
 # check if git exists
 if ! command -v git &>/dev/null; then
 	printf "%s\n\n" "${BOLD}${FG_SKYBLUE}${RESET}"
-	echo "[❌] I can't live without Git 😞"
+	echo "[❌] I can't live without ${BOLD}Git${RESET} 😞"
 	exit 1
 fi
 
 # check if stow exists
 if ! command -v stow &>/dev/null; then
 	printf "%s\n\n" "${BOLD}${FG_SKYBLUE}${RESET}"
-	echo "[❌] I can't live without Stow 😞"
+	echo "[❌] I can't live without ${BOLD}Stow${RESET} 😞"
 	exit 1
 fi
 
 # check if tree exists
 if ! command -v tree &>/dev/null; then
 	printf "%s\n\n" "${BOLD}${FG_SKYBLUE}${RESET}"
-	echo "[❌] I can't live without Tree 😞"
+	echo "[❌] I can't live without ${BOLD}Tree 😞"
 	exit 1
 fi
 
@@ -142,7 +142,7 @@ clone_dotrepo() {
 
 add_env() {
 	echo "$DOT_PARENT_DIR $DOT_REPO $DOT_REPO_REMOTE $DOT_REPO_BRANCH"
-	if [[ $(grep -Fxq "export DOT_REPO" "$HOME"/.bashrc) || $(grep -Fxq "export DOT_REPO" "$HOME"/.zshrc) ]]; then
+	if grep -q "export DOT_REPO" "$HOME"/.bashrc || grep -q "export DOT_REPO" "$HOME"/.zshrc; then
 		return
 	fi
 	# export environment variables
@@ -188,13 +188,13 @@ repo_check() {
 setup_stow() {
 	printf "\n%s\n" "🌟 ${BOLD}Setup stow...${RESET}"
 	printf "\n%s" "Your current dotfiles in ${BOLD}${DOT_REPO_DIR}${RESET}"
-    tree "${DOT_REPO_DIR}"/home
+	tree "${DOT_REPO_DIR}"/home
 	printf "\n%s" "Execute stow command..."
-    cd "${DOT_REPO_DIR}" || return
+	cd "${DOT_REPO_DIR}" || return
 	# force create symbol link
 	# for more details, please check `man stow`
-    stow -v --adopt -t "${HOME}" "${DOT_REPO_NAME}"
-    cd - || return
+	stow -v --adopt -t "${HOME}" "${DOT_REPO_NAME}"
+	cd - || return
 }
 
 setup_automatic() {
@@ -202,7 +202,6 @@ setup_automatic() {
 	printf "\n"
 	printf "%s\n" "${BOLD}${FG_ORANGE}NOTE:${RESET} To use this feature, you have to configure git user (email & name)"
 	printf "%s\n" "      You also have to use git to allow push without entering username & password!"
-	printf "%s\n"
 	printf "\n%s\n" "Check if there are gitwatch processes is running"
 	gitwatch_proc=$(ps -ef | grep "gitwatch" | grep -v "grep")
 	if [[ ${#gitwatch_proc} != 0 ]]; then
@@ -233,11 +232,12 @@ setup_automatic() {
 
 start_gitwatch() {
 	printf "\n%s\n" "🌟 ${BOLD}Start a gitwatch process in background${RESET}"
-    mkdir -p "$HOME"/.dotboss_log
-    nohup gitwatch -r "${DOT_REPO_REMOTE}" -b "${DOT_REPO_BRANCH}" "${DOT_REPO_DIR}" > "$HOME"/.dotboss_log/watch.log &
+	mkdir -p "$HOME"/.dotboss_log
+	nohup gitwatch -r "${DOT_REPO_REMOTE}" -b "${DOT_REPO_BRANCH}" "${DOT_REPO_DIR}" >"$HOME"/.dotboss_log/watch.log &
 	printf "\n%s" "The process's output logging can be found here - ${BOLD}$HOME/.dotboss_log/watch.log${RESET}"
 	printf "\n%s\n" "${BOLD}Create init file to start gitwatch at startup (require ${BOLD}root priviledge${RESET})"
 	sudo echo "nohup gitwatch -r "${DOT_REPO_REMOTE}" -b "${DOT_REPO_BRANCH}" "${DOT_REPO_DIR}" > "$HOME"/.dotboss_log/watch.log &" >/etc/init.d/dotboss_gitwatch
+	sudo echo "nohup gitwatch -r ""${DOT_REPO_REMOTE}"" -b ""${DOT_REPO_BRANCH}"" ""${DOT_REPO_DIR}"" > ""$HOME""/.dotboss_log/watch.log &" >/etc/init.d/dotboss_gitwatch
 	sudo chmod a+x /etc/init.d/dotboss_gitwatch
 }
 
@@ -293,7 +293,7 @@ dot_pull() {
 dot_push() {
 	show_diff_check
 	printf "\n%s\n" "🌟 ${BOLD}Pushing dotfiles ...${RESET}"
-	changed_files=$(git -C "$dot_repo" --no-pager diff --name-only)
+	changed_files=$(git -C "${DOT_REPO_DIR}" --no-pager diff --name-only)
 	if [[ ${#changed_files} != 0 ]]; then
 		printf "\n%s" "${BOLD}Following dotfiles changed${RESET}"
 		git -C "${DOT_REPO_DIR}" add -A
