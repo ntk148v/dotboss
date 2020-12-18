@@ -203,7 +203,7 @@ setup_automatic() {
 	printf "%s\n" "${BOLD}${FG_ORANGE}NOTE:${RESET} To use this feature, you have to configure git user (email & name)"
 	printf "%s\n" "      You also have to use git to allow push without entering username & password!"
 	printf "\n%s\n" "Check if there are gitwatch processes is running"
-	gitwatch_proc=$(ps -ef | grep "gitwatch" | grep -v "grep")
+	gitwatch_proc=$(pgrep -f gitwatch)
 	if [[ ${#gitwatch_proc} != 0 ]]; then
 		printf "\n%s\n" "Found gitwatch processes is running"
 		printf "\n%s" "[${BOLD}1${RESET}] Kill the current gitwatch process(es)"
@@ -242,7 +242,7 @@ start_gitwatch() {
 
 kill_gitwatch() {
 	printf "\n%s\n" "🌟 ${BOLD}Kill a gitwatch process in background${RESET}"
-	ps -ef | grep "gitwatch" | grep -v "grep" | awk '{print $2}' | xargs kill -9
+	pgrep -f gitwatch | xargs kill -9
 	printf "\n%s\n" "${BOLD}Killed! 💀${RESET}"
 }
 
