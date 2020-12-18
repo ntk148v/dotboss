@@ -50,6 +50,17 @@ $ chmod a+x dotboss.sh
 ## 4. Usage
 
 - Prepare your repository, folder structure should look like this:
+
+```bash
+$ tree
+.
+|-- LICENSE
+|-- README.md
+`-- home
+
+1 directory, 2 files
+```
+
 - Configure your Git username & email for commits. For example:
 
 ```bash
