@@ -49,7 +49,24 @@ $ chmod a+x dotboss.sh
 
 ## 4. Usage
 
-Just run `dotboss` anywhere in your terminal.
+- Prepare your repository, folder structure should look like this:
+- Configure your Git username & email for commits. For example:
+
+```bash
+$ git config --global user.name "FIRST_NAME LAST_NAME"
+$ git config --global user.email "MY_NAME@example.com"
+```
+
+- Note that, if you use automatic mode, you have to configure remote url as SSH url. This is documented at Github: [Switching remote URLs from HTTPS to SSH](https://help.github.com/articles/changing-a-remote-s-url/#switching-remote-urls-from-https-to-ssh). Or you can configure Git to store your username & password.
+
+```bash
+# Make Git store the username and password and it will never ask for them.
+$ git config --global credential.helper store
+# Save the username and password for a session (cache it);
+$ git config --global credential.helper cache
+```
+
+- Run `dotboss` anywhere in your terminal.
 
 ```bash
 $ dotboss
