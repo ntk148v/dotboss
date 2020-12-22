@@ -317,7 +317,7 @@ manage() {
 		printf "\n%s\n" "[${BOLD}1${RESET}] Automatic mode with gitwatch"
 		printf "\n%s\n" "[${BOLD}2${RESET}] Manual mode"
 		printf "\n%s\n" "[${BOLD}q/Q${RESET}] Quit Session"
-		read -p "\nWhat do you want me to do? [${BOLD}1${RESET}]: " -n 1 -r USER_INPUT
+		read -p "What do you want me to do? [${BOLD}1${RESET}]: " -n 1 -r USER_INPUT
 		# Default choice is [1], See Parameter Expansion
 		USER_INPUT=${USER_INPUT:-1}
 		case $USER_INPUT in
