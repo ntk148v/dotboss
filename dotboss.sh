@@ -126,7 +126,8 @@ clone_dotrepo() {
 	DOT_REPO=$2
 	DOT_REPO_REMOTE=$3
 	DOT_REPO_BRANCH=$4
-	DOT_REPO_NAME=${$(basename "${DOT_REPO}")%".git"}
+	DOT_REPO_NAME=$(basename "${DOT_REPO}")
+	DOT_REPO_NAME=${DOT_REPO_NAME%".git"}
 	printf "\n%s\r\n" "${BOLD}🌟 Calling 📞 Git ... ${RESET}"
 	if git clone "${DOT_REPO}" "${DOT_PARENT_DIR}"/"${DOT_REPO_NAME}"; then
 		if [[ "$DOT_PARENT_DIR" && "$DOT_REPO" && "$DOT_REPO_REMOTE" && "$DOT_REPO_BRANCH" ]]; then
@@ -149,7 +150,8 @@ add_env() {
 	printf "\n%s\n" "🌟 Exporting env variables DOT_PARENT_DIR, DOT_REPO, DOT_REPO_REMOTE & DOT_REPO_BRANCH ..."
 
 	current_shell=$(basename "$SHELL")
-	DOT_REPO_NAME=${$(basename "${DOT_REPO}")%".git"}
+	DOT_REPO_NAME=$(basename "${DOT_REPO}")
+	DOT_REPO_NAME=${DOT_REPO_NAME%".git"}
 	DOT_REPO_DIR=${DOT_PARENT_DIR}/${DOT_REPO_NAME}
 	if [[ $current_shell == "zsh" ]]; then
 		echo "# Dotboss configs" >>"$HOME"/.zshrc
@@ -168,8 +170,8 @@ add_env() {
 
 repo_check() {
 	# check if dotfile repo is present inside DOT_PARENT_DIR
-
-	DOT_REPO_NAME=${$(basename "${DOT_REPO}")%".git"}
+	DOT_REPO_NAME=$(basename "${DOT_REPO}")
+	DOT_REPO_NAME=${DOT_REPO_NAME%".git"}
 	# all paths are relative to HOME
 	if [[ -d ${DOT_PARENT_DIR}/${DOT_REPO_NAME} ]]; then
 		printf "\n%s\n" "Found ${BOLD}${DOT_REPO_NAME}${RESET} as dotfile repo in ${BOLD}~/${DOT_PARENT_DIR}/${RESET}"
