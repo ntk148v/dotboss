@@ -149,7 +149,7 @@ add_env() {
 	printf "\n%s\n" "🌟 Exporting env variables DOT_PARENT_DIR, DOT_REPO, DOT_REPO_REMOTE & DOT_REPO_BRANCH ..."
 
 	current_shell=$(basename "$SHELL")
-	DOT_REPO_NAME=$(basename "${DOT_REPO}")
+	DOT_REPO_NAME=${$(basename "${DOT_REPO}")%".git"}
 	DOT_REPO_DIR=${DOT_PARENT_DIR}/${DOT_REPO_NAME}
 	if [[ $current_shell == "zsh" ]]; then
 		echo "# Dotboss configs" >>"$HOME"/.zshrc
