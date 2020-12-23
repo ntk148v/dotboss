@@ -40,11 +40,12 @@ dotboss is a easy to use dotfiles manager.
   - [`gitwatch`](https://github.com/gitwatch/gitwatch)
   - [`inotify-tools`](https://github.com/rvoicilas/inotify-tools)
 
-- Grab [dotboss.sh](./dotboss.sh) and store it (ideally please store it in PATH folders to call it from anywhere).
-- Change file permissions to be executable.
+- `dotboss` can be installed from source by simply cloning the repository and putting the shell script into your `$PATH`. The bellow commands will do that for you if `/usr/local/bin` is in your `$PATH`. You may need to involve `install` with `sudo`.
 
 ```bash
-$ chmod a+x dotboss.sh
+$ git clone https://github.com/ntk148v/dotboss.git
+$ cd dotboss
+$ [sudo] install -b dotboss.sh /usr/local/bin/dotboss
 ```
 
 ## 4. Usage
