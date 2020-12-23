@@ -234,7 +234,7 @@ start_gitwatch() {
 	printf "\n%s\n" "🌟 ${BOLD}Start a gitwatch process in background${RESET}"
 	mkdir -p "$HOME"/.dotboss_log
 	nohup gitwatch -r "${DOT_REPO_REMOTE}" -b "${DOT_REPO_BRANCH}" "${DOT_REPO_DIR}" >"$HOME"/.dotboss_log/watch.log &
-	printf "\n%s" "The process's output logging can be found here - ${BOLD}$HOME/.dotboss_log/watch.log${RESET}"
+	printf "\n%s\n" "The process's output logging can be found here - ${BOLD}$HOME/.dotboss_log/watch.log${RESET}"
 	printf "\n%s\n" "${BOLD}Create init file to start gitwatch at startup (require ${BOLD}root priviledge${RESET})"
 	sudo echo "nohup gitwatch -r ""${DOT_REPO_REMOTE}"" -b ""${DOT_REPO_BRANCH}"" ""${DOT_REPO_DIR}"" > ""$HOME""/.dotboss_log/watch.log &" | sudo tee /etc/init.d/dotboss_gitwatch
 	sudo chmod a+x /etc/init.d/dotboss_gitwatch
@@ -272,11 +272,11 @@ setup_manual() {
 
 show_diff_check() {
 	printf "\n%s\n" "🌟 ${BOLD}Check git status & git diff...${RESET}"
-	printf "\n%s" "${BOLD}List all file changed${RESET}"
-	changed_files=$(git -C "${DOT_REPO_DIR}" --no-pager diff --name-only)
-	printf "\n%s" "$changed_files"
+	printf "\n%s\n" "${BOLD}List all file changed/added${RESET}"
+	changed_files=$(git -C "${DOT_REPO_DIR}" status --porcelain | awk '{ print $2 }')
+	printf "\n%s\n" "$changed_files"
 	changes=$(git -C "${DOT_REPO_DIR}" --no-pager diff --color)
-	printf "\n%s" "${BOLD}List all changes${RESET}"
+	printf "\n%s\n" "${BOLD}List all changes${RESET}"
 	printf "\n%s\n" "$changes"
 }
 
@@ -292,9 +292,9 @@ dot_pull() {
 dot_push() {
 	show_diff_check
 	printf "\n%s\n" "🌟 ${BOLD}Pushing dotfiles ...${RESET}"
-	changed_files=$(git -C "${DOT_REPO_DIR}" --no-pager diff --name-only)
+	changed_files=$(git -C "${DOT_REPO_DIR}" status --porcelain | awk '{ print $2 }')
 	if [[ ${#changed_files} != 0 ]]; then
-		printf "\n%s" "${BOLD}Following dotfiles changed${RESET}"
+		printf "\n%s\n" "${BOLD}Following dotfiles changed${RESET}"
 		git -C "${DOT_REPO_DIR}" add -A
 		echo "${BOLD}Enter Commit message (Ctrl + d to save): ${RESET}"
 		commit=$(</dev/stdin)
