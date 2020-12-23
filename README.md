@@ -14,8 +14,8 @@ ________   _____________________________ ________    _________ _________
   - [2. Features](#2-features)
   - [3. Installation](#3-installation)
   - [4. Usage](#4-usage)
-  - [Usage](#usage)
-  - [Sample source dotfiles repository](#sample-source-dotfiles-repository)
+  - [5. Explanation](#5-explanation)
+  - [6. Sample source dotfiles repository](#6-sample-source-dotfiles-repository)
 
 ## 1. What is this?
 
@@ -106,10 +106,12 @@ NOTE: Your dotfiles folder has to contain a subfolder named home
 ➤ Enter dotfiles repository URL:
 ```
 
-## Usage
+## 5. Explanation
+
+Explain how dotboss works inside, options...
 
 > **TODO**
 
-## Sample source dotfiles repository
+## 6. Sample source dotfiles repository
 
 You can found the sample dotfiles repository [here](https://github.com/ntk148v/dotfiles).
