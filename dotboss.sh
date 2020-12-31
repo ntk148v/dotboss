@@ -204,13 +204,13 @@ repo_check() {
 
 setup_stow() {
 	printf "\n%s\n" "🌟 ${BOLD}Setup stow...${RESET}"
-	printf "\n%s" "Your current dotfiles in ${BOLD}${DOT_REPO_DIR}${RESET}"
-	tree "${DOT_REPO_DIR}"/home
-	printf "\n%s" "Execute stow command..."
+	printf "\n%s\n" "Your current dotfiles in ${BOLD}${DOT_REPO_DIR}${RESET}"
+	tree -a "${DOT_REPO_DIR}"/home
+	printf "\n%s\n" "Execute stow command..."
 	cd "${DOT_REPO_DIR}" || return
 	# force create symbol link
 	# for more details, please check `man stow`
-	stow -v --adopt -t "${HOME}" "${DOT_REPO_NAME}"
+	stow -v --adopt -t "${HOME}" home
 	cd - || return
 }
 
