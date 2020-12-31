@@ -1,9 +1,9 @@
 [Unit]
-Descripiton=Watch dotfiles repository and git commit all changes using gitwatch. run with: systemctl --user --now enable dotboss@$(systemd-escape "'-r url/to/repository' -r git-branch /path/to/folder").service
+Description=Watch dotfiles repository and git commit all changes using gitwatch.
 
 [Service]
-Environment="SCRIPT_ARGS=%I"
-ExecStart=/usr/local/bin/gitwatch $SCRIPT_ARGS
+EnvironmentFile=%h/.config/dotboss/config
+ExecStart=bash -c "/usr/local/bin/gitwatch -r ${DOT_REPO_REMOTE} -b ${DOT_REPO_BRANCH} -l ${USER} -s 60 ${DOT_REPO_DIR}"
 ExecStop=/bin/true
 
 [Install]

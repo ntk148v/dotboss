@@ -248,15 +248,21 @@ setup_automatic() {
 }
 
 start_gitwatch() {
+	DOT_BOSS_DIR="${HOME}/.config/dotboss"
 	printf "\n%s\n" "🌟 ${BOLD}Start a gitwatch process in background${RESET}"
-	mkdir -p "$HOME"/.dotboss_log
-	nohup gitwatch -r "${DOT_REPO_REMOTE}" -b "${DOT_REPO_BRANCH}" -m "Auto sync dotfiles on change (%d) by dotboss" -s 60 "${DOT_REPO_DIR}" >>"$HOME"/.dotboss_log/watch.log &
-	printf "\n%s\n" "The process's output logging can be found here - ${BOLD}$HOME/.dotboss_log/watch.log${RESET}"
+	printf "\n%s\n" "The process's output logging can be found here - ${BOLD}${DOT_BOSS_DIR}/watch.log${RESET}"
 	printf "\n%s\n" "${BOLD}Setup to start gitwatch on boot (require ${BOLD}root priviledge${RESET})"
-	sudo touch /etc/init.d/dotboss
-	sudo chmod a+x /etc/init.d/dotboss
-	sudo echo "#!/bin/bash" | sudo tee /etc/init.d/dotboss
-	sudo echo "su ${USER} -c \"/usr/local/bin/gitwatch -r ""${DOT_REPO_REMOTE}"" -b ""${DOT_REPO_BRANCH}"" -l ""${USER}"" -m 'Auto sync dotfiles on change (%d) by dotboss' -s 60 ""${DOT_REPO_DIR}"" >> ""$HOME""/.dotboss_log/watch.log &""\"" | sudo tee -a /etc/init.d/dotboss
+	echo "
+DOT_REPO_REMOTE=${DOT_REPO_REMOTE}
+DOT_REPO_BRANCH=${DOT_REPO_BRANCH}
+DOT_REPO_DIR=${DOT_REPO_DIR}
+	" >${DOT_BOSS_DIR}/config
+	mkdir -p "$HOME/.config/systemd/user"
+	cp ${DOT_BOSS_DIR}/dotboss@.service ${HOME}/.config/systemd/user
+	systemctl --user daemon-reload
+	systemctl --user --now enable dotboss.service
+	systemctl --user --now start dotboss.service
+	systemctl --user --now status dotboss.service
 }
 
 kill_gitwatch() {

@@ -47,7 +47,7 @@ dotboss is a easy to use dotfiles manager.
 ```bash
 $ git clone https://github.com/ntk148v/dotboss.git
 $ cd dotboss
-$ [sudo] install -b dotboss.sh /usr/local/bin/dotboss
+$ bash install.sh
 ```
 
 ## 4. Usage
