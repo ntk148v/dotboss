@@ -3,7 +3,7 @@ Description=Watch dotfiles repository and git commit all changes using gitwatch.
 
 [Service]
 EnvironmentFile=%h/.config/dotboss/config
-ExecStart=bash -c "/usr/local/bin/gitwatch -r ${DOT_REPO_REMOTE} -b ${DOT_REPO_BRANCH} -l ${USER} -s 60 ${DOT_REPO_DIR}"
+ExecStart=bash -c "/usr/local/bin/gitwatch -r ${DOT_REPO_REMOTE} -b ${DOT_REPO_BRANCH} -s 60 ${DOT_REPO_DIR} >> $HOME/.config/dotboss/watch.log"
 ExecStop=/bin/true
 
 [Install]

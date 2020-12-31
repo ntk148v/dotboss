@@ -258,7 +258,7 @@ DOT_REPO_BRANCH=${DOT_REPO_BRANCH}
 DOT_REPO_DIR=${DOT_REPO_DIR}
 	" >${DOT_BOSS_DIR}/config
 	mkdir -p "$HOME/.config/systemd/user"
-	cp ${DOT_BOSS_DIR}/dotboss@.service ${HOME}/.config/systemd/user
+	cp ${DOT_BOSS_DIR}/dotboss.service ${HOME}/.config/systemd/user
 	systemctl --user daemon-reload
 	systemctl --user --now enable dotboss.service
 	systemctl --user --now start dotboss.service

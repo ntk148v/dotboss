@@ -13,6 +13,8 @@ echo "# Setup config directory"
 DOT_BOSS_DIR=${HOME}/.config/dotboss
 mkdir -p ${DOT_BOSS_DIR}
 if [ ! -f ${HOME}/.config/dotboss/dotboss@.service ]; then
-    cp dotboss@.service ${HOME}/.config/dotboss
+    cp dotboss.service ${HOME}/.config/dotboss
 fi
+echo "# Install dotboss"
+sudo install -b dotboss.sh /usr/local/bin/dotboss
 echo "# Done!"
