@@ -204,14 +204,19 @@ repo_check() {
 
 setup_stow() {
 	printf "\n%s\n" "🌟 ${BOLD}Setup stow...${RESET}"
+	printf "\n"
+	read -p "➤ Enter regex pattern you want stow to ignore: " -r STOW_IGNORE_PATTERN
 	printf "\n%s\n" "Your current dotfiles in ${BOLD}${DOT_REPO_DIR}${RESET}"
 	tree -a "${DOT_REPO_DIR}"/home
 	printf "\n%s\n" "Execute stow command..."
-	cd "${DOT_REPO_DIR}" || return
 	# force create symbol link
 	# for more details, please check `man stow`
-	stow -v --adopt -t "${HOME}" home
-	cd - || return
+	# Ignore some files cause they may be symbol links.
+	if [[ -z ${STOW_IGNORE_PATTERN} ]]; then
+		stow -v --adopt -t "${HOME}" -d ${DOT_REPO_DIR} home
+	else
+		stow -v --adopt -t "${HOME}" -d ${DOT_REPO_DIR} --ignore=${STOW_IGNORE_PATTERN} home
+	fi
 }
 
 setup_automatic() {
